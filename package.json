@@ -1,0 +1,15 @@
+{
+  "name": "js-script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cash-dom": "^8.1.2",
+    "typescript": "^4.9.3"
+  }
+}
