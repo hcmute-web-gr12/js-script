@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "node esbuild.js",
+    "dev": "node esbuild.js --watch"
   },
   "author": "",
   "license": "ISC",
