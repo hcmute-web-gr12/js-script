@@ -44,8 +44,11 @@ function onClick(this: HTMLLinkElement, ev: Event) {
 			'Content-Type': 'text/html'
 		}
 	})
-		.then(async v => ({ status: v.status, text: await v.text() }))
-		.then(({ status, text }) => {
+		.then(async v => Promise.all([
+			new Promise(resolve => setTimeout(resolve, 300)),
+			{ status: v.status, text: await v.text() }
+		]))
+		.then(([_, { status, text }]) => {
 			const slot = document.getElementById('tab-slot');
 			if (!slot) {
 				return;
