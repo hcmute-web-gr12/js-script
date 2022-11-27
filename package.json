@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/dompurify": "^2.4.0",
+    "@types/marked": "^4.0.7",
     "cash-dom": "^8.1.2",
     "esbuild": "^0.15.15",
     "typescript": "^4.9.3"
