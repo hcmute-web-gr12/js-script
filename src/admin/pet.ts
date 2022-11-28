@@ -1,26 +1,40 @@
+let submitting = false;
+
 async function submit(this: HTMLFormElement, ev: Event) {
 	ev.preventDefault();
-	const dialog = document.getElementById('add-pet-dialog');
+	if (submitting) {
+		return;
+	}
+	submitting = true;
+	const dialog = document.getElementById('pet-dialog');
 	if (dialog instanceof HTMLDialogElement) {
-		const { status } = await fetch(this.action, { method: 'post', body: new URLSearchParams(new FormData(this) as any) });
-		dialog.close();
+		const res = await fetch(this.action, { method: 'post', body: new URLSearchParams(new FormData(this) as any) });
+		submitting = false;
+		if (res.status === 200) {
+			dialog.close();
+			return;
+		}
+		const p = document.getElementById('pet-form-error') as HTMLParagraphElement;
+		if (p) {
+			p.innerHTML = await res.text();
+		}
 	}
 }
 
 function showDialog(this: HTMLButtonElement) {
-	const dialog = document.getElementById('add-pet-dialog');
+	const dialog = document.getElementById('pet-dialog');
 	if (dialog instanceof HTMLDialogElement) {
 		dialog.showModal();
 	}
 }
 
 function closeDialog(this: HTMLButtonElement) {
-	const dialog = document.getElementById('add-pet-dialog');
+	const dialog = document.getElementById('pet-dialog');
 	if (dialog instanceof HTMLDialogElement) {
 		dialog.close();
 	}
 }
 
-document.getElementById('add-pet-form')?.addEventListener('submit', submit);
-document.getElementById('add-pet-button')?.addEventListener('pointerdown', showDialog);
-document.getElementById('add-pet-back')?.addEventListener('pointerdown', closeDialog);
+document.getElementById('pet-form')?.addEventListener('submit', submit);
+document.getElementById('pet-add')?.addEventListener('pointerdown', showDialog);
+document.getElementById('pet-form-back')?.addEventListener('pointerdown', closeDialog);
