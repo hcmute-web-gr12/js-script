@@ -8,7 +8,7 @@ async function submit(this: HTMLFormElement, ev: Event) {
 	submitting = true;
 	const dialog = document.getElementById('pet-dialog');
 	if (dialog instanceof HTMLDialogElement) {
-		const res = await fetch(this.action, { method: 'post', body: new URLSearchParams(new FormData(this) as any) });
+		const res = await fetch(this.action, { method: 'post', body: new FormData(this) });
 		submitting = false;
 		if (res.status === 200) {
 			dialog.close();
