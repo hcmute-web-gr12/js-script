@@ -1,9 +1,9 @@
-export const makeSpinner = () => {
+export const makeSpinner = (...classList: string[]) => {
 	const xmlns = 'http://www.w3.org/2000/svg';
 	const svg = document.createElementNS(xmlns, 'svg') as any as SVGElement;
 	const circle = document.createElementNS(xmlns, 'circle') as any as SVGCircleElement;
 	const path = document.createElementNS(xmlns, 'path') as any as SVGPathElement;
-	svg.classList.add('animate-spin', 'h-4', 'w-4', 'mr-2', 'text-stone-100');
+	svg.classList.add('animate-spin', 'text-stone-100', ...classList);
 	svg.setAttribute('fill', 'none');
 	svg.setAttribute('viewBox', '0 0 24 24');
 	circle.classList.add('opacity-25');
@@ -19,16 +19,16 @@ export const makeSpinner = () => {
 	return svg;
 }
 
-export const appendSpinner = (element: HTMLElement) => {
-	const spinner = makeSpinner();
+export const appendSpinner = (element: HTMLElement, ...classList: string[]) => {
+	const spinner = makeSpinner(...classList);
 	element.append(spinner);
 	return () => {
 		spinner.remove();
 	}
 }
 
-export const prependSpinner = (element: HTMLElement) => {
-	const spinner = makeSpinner();
+export const prependSpinner = (element: HTMLElement, ...classList: string[]) => {
+	const spinner = makeSpinner(...classList);
 	element.prepend(spinner);
 	console.log(spinner, element);
 	return () => {
