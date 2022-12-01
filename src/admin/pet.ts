@@ -74,7 +74,7 @@ function buildDeleteRequest(...indexes: number[]) {
 }
 
 async function deletePet(this: HTMLButtonElement) {
-	const index = this.id.replace('delete-pet-', '');
+	const index = this.id.replace('pet-delete-', '');
 	const html = this.innerHTML;
 	const spinner = makeSpinner('w-5', 'h-5');
 	this.replaceChildren(spinner);
@@ -103,7 +103,7 @@ function addTableEvents() {
 		btn.addEventListener('click', editPet);
 	}
 
-	for (const btn of document.getElementsByClassName('delete-pet') as any as HTMLButtonElement[] || []) {
+	for (const btn of document.getElementsByClassName('pet-delete') as any as HTMLButtonElement[] || []) {
 		btn.addEventListener('click', deletePet);
 	}
 
@@ -132,9 +132,8 @@ async function deleteSomePets(this: HTMLButtonElement) {
 	const buttons: HTMLButtonElement[] = [];
 	for (const [k, v] of (Array.from(document.getElementsByClassName('pet-select')) as HTMLInputElement[]).entries() ) {
 		if (v.checked) {
-			buttons.push(document.getElementById(`delete-pet-${k}`) as HTMLButtonElement);
+			buttons.push(document.getElementById(`pet-delete-${k}`) as HTMLButtonElement);
 			indexes.push(k);
-			console.log(k, document.getElementById(`delete-pet-${k}`));
 		}
 	}
 	if (!indexes.length) {
