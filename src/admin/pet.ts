@@ -64,6 +64,10 @@ async function updatePets() {
 	table.querySelector('tfoot')?.remove();
 	table.insertAdjacentHTML('beforeend', html);
 	addTableEvents();
+	const selectAllCheckbox = document.getElementById('pet-select-all') as HTMLInputElement | undefined;
+	if (selectAllCheckbox) {
+		selectAllCheckbox.checked = false;
+	}
 	setTimeout(() => {
 		table.classList.remove('animate-pulse');
 	}, 100);
@@ -111,16 +115,16 @@ function buildDeleteRequest(...indexes: number[]) {
 
 async function deletePet(this: HTMLButtonElement) {
 	const index = this.id.replace('pet-delete-', '');
-	const html = this.innerHTML;
-	const spinner = makeSpinner('w-5', 'h-5');
-	this.replaceChildren(spinner);
+	const clone = this.cloneNode() as HTMLButtonElement;
+	clone.append(makeSpinner('w-5', 'h-5'));
+	this.replaceWith(clone);
 
 	++deleteScheduler.counter;
 	const status = (await fetch(buildDeleteRequest(+index), { method: 'delete' })).status;
 	--deleteScheduler.counter;
 
-	spinner.remove();
-	this.innerHTML = html;
+	clone.replaceWith(this);
+	clone.remove();
 	if (status === 200) {
 		this.disabled = true;
 		deleteScheduler.shouldUpdate = true;
@@ -176,14 +180,14 @@ async function deleteSomePets(this: HTMLButtonElement) {
 		return;
 	}
 	const requestString = buildDeleteRequest(...indexes);
-	const htmls: string[] = [];
+	const clones: HTMLButtonElement[] = [];
 	const promise = fetch(requestString, { method: 'delete' });
 	buttons.push(this);
 	for(const button of buttons) {
-		htmls.push(button.innerHTML);
-		const spinner = makeSpinner('w-5', 'h-5');
-		button.replaceChildren(spinner);
-		button.disabled = true;
+		const clone = button.cloneNode() as HTMLButtonElement;
+		clones.push(clone);
+		clone.append(makeSpinner('w-5', 'h-5'));
+		button.replaceWith(clone);
 	}
 
 	++deleteScheduler.counter;
@@ -191,9 +195,8 @@ async function deleteSomePets(this: HTMLButtonElement) {
 	--deleteScheduler.counter;
 
 	for(const [k, button] of buttons.entries()) {
-		button.firstElementChild!.remove();
-		button.innerHTML = htmls[k];
-		button.disabled = true;
+		clones[k].replaceWith(button);
+		clones[k].remove();
 	}
 	if (status === 200) {
 		deleteScheduler.shouldUpdate = true;
