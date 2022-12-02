@@ -65,8 +65,13 @@ async function updatePets() {
 	}, 100);
 }
 
-function editPet(this: HTMLButtonElement, ev: Event) {
-
+function editPet(this: HTMLButtonElement) {
+	const index = this.id.replace('pet-edit-', '');
+	const dialog = document.getElementById('pet-edit-dialog') as HTMLDialogElement;
+	if (!dialog) {
+		return;
+	}
+	dialog.showModal();
 }
 
 function buildDeleteRequest(...indexes: number[]) {
@@ -99,7 +104,7 @@ async function deletePet(this: HTMLButtonElement) {
 }
 
 function addTableEvents() {
-	for (const btn of document.getElementsByClassName('edit-pet') as any as HTMLButtonElement[] || []) {
+	for (const btn of document.getElementsByClassName('pet-edit') as any as HTMLButtonElement[] || []) {
 		btn.addEventListener('click', editPet);
 	}
 
