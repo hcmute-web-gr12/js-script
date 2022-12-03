@@ -6,9 +6,9 @@ const deleteScheduler: { counter: number, shouldUpdate: boolean } = {
 	counter: 0,
 	shouldUpdate: false
 };
-const editScheduler: { editing: boolean, shouldUpdate: boolean } = {
+const editScheduler: { index: number, editing: boolean } = {
+	index: -1,
 	editing: false,
-	shouldUpdate: false
 };
 
 async function submit(this: HTMLFormElement, ev: Event) {
@@ -31,7 +31,7 @@ async function submit(this: HTMLFormElement, ev: Event) {
 		}
 		const p = document.getElementById('pet-form-error') as HTMLParagraphElement;
 		if (p) {
-			p.innerHTML = await res.text();
+			p.textContent = await res.text();
 		}
 	}
 }
@@ -71,42 +71,6 @@ async function updatePets() {
 	setTimeout(() => {
 		table.classList.remove('animate-pulse');
 	}, 100);
-}
-
-async function editPet(this: HTMLButtonElement) {
-	if (editScheduler.editing) {
-		return;
-	}
-	const dialog = document.getElementById('pet-edit-dialog') as HTMLDialogElement;
-	if (!dialog) {
-		return;
-	}
-	const index = this.id.replace('pet-edit-', '');
-	const clone = this.cloneNode() as HTMLElement;
-	editScheduler.editing = true;
-	clone.appendChild(makeSpinner('w-5', 'h-5'));
-	this.replaceWith(clone);
-	const res = await fetch(buildDeleteRequest(+index));
-	if (res.status === 200) {
-		clone.replaceWith(this);
-		clone.remove();
-		const json = await res.json();
-		if (json) {
-			const name = document.getElementById('pet-edit-name') as HTMLInputElement | undefined;
-			const price = document.getElementById('pet-edit-price') as HTMLInputElement | undefined;
-			const stock = document.getElementById('pet-edit-stock') as HTMLInputElement | undefined;
-			const image = document.getElementById('pet-edit-image') as HTMLImageElement | undefined;
-			const description = document.getElementById('pet-edit-description') as HTMLTextAreaElement | undefined;
-			if (name) name.value = json.name;
-			if (price) price.value = json.price;
-			if (stock) stock.value = json.stock;
-			if (image) image.src = json.imagePublicId;
-			if (description) description.value = json.description;
-			dialog.showModal();
-			return;
-		}
-	}
-	editScheduler.editing = false;
 }
 
 function buildDeleteRequest(...indexes: number[]) {
@@ -210,10 +174,72 @@ async function deleteSomePets(this: HTMLButtonElement) {
 	}
 }
 
+async function editPet(this: HTMLButtonElement) {
+	if (editScheduler.editing) {
+		return;
+	}
+	const dialog = document.getElementById('pet-edit-dialog') as HTMLDialogElement;
+	if (!dialog) {
+		return;
+	}
+	editScheduler.index = +this.id.replace('pet-edit-', '');
+	const clone = this.cloneNode() as HTMLElement;
+	editScheduler.editing = true;
+	clone.appendChild(makeSpinner('w-5', 'h-5'));
+	this.replaceWith(clone);
+	const res = await fetch(buildDeleteRequest(editScheduler.index));
+	clone.replaceWith(this);
+	clone.remove();
+	if (res.status === 200) {
+		const json = await res.json();
+		if (json) {
+			const name = document.getElementById('pet-edit-name') as HTMLInputElement | undefined;
+			const price = document.getElementById('pet-edit-price') as HTMLInputElement | undefined;
+			const stock = document.getElementById('pet-edit-stock') as HTMLInputElement | undefined;
+			const image = document.getElementById('pet-edit-image') as HTMLImageElement | undefined;
+			const description = document.getElementById('pet-edit-description') as HTMLTextAreaElement | undefined;
+			if (name) name.value = json.name;
+			if (price) price.value = json.price;
+			if (stock) stock.value = json.stock;
+			if (image) image.src = json.imagePublicId;
+			if (description) description.value = json.description;
+			dialog.showModal();
+			return;
+		}
+	}
+	editScheduler.editing = false;
+}
+
+async function submitEdit(this: HTMLFormElement, ev: Event) {
+	ev.preventDefault();
+	const data = new FormData(this);
+	data.set('index', editScheduler.index + '');
+
+	const remove = prependSpinner(document.getElementById('pet-edit-submit') as HTMLButtonElement, 'w-4', 'h-4', 'mr-2');
+	const response = await fetch('/api/admin/pet', { method: 'put', body: data });
+	remove();
+
+	if (response.status === 200) {
+		updatePets();
+		(document.getElementById('pet-edit-dialog') as HTMLDialogElement).close();
+		return;
+	}
+	(document.getElementById('pet-edit-error') as HTMLParagraphElement).textContent = await response.text();
+}
+
+function closeEdit(this: HTMLDialogElement) {
+	editScheduler.editing = false;
+}
+
 document.getElementById('pet-form')?.addEventListener('submit', submit);
 document.getElementById('pet-add')?.addEventListener('pointerdown', showDialog);
 document.getElementById('pet-form-back')?.addEventListener('pointerdown', closeDialog);
 document.getElementById('pet-select-all')?.addEventListener('input', toggleSelectAll);
 document.getElementById('pet-select-all')?.addEventListener('input', toggleSelectAll);
 document.getElementById('pet-delete-some')?.addEventListener('click', deleteSomePets);
+document.getElementById('pet-edit-dialog')?.addEventListener('close', closeEdit);
+document.getElementById('pet-edit-form')?.addEventListener('submit', submitEdit);
+document.getElementById('pet-edit-back')?.addEventListener('click', () => {
+	(document.getElementById('pet-edit-dialog') as HTMLDialogElement).close();
+});
 addTableEvents();
