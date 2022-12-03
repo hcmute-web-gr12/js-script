@@ -50,14 +50,16 @@ function closeDialog(this: HTMLButtonElement) {
 	}
 }
 
-async function updatePets() {
+async function updatePets(params?: URLSearchParams) {
 	const table = document.getElementById('pet-table');
 	if (!(table instanceof HTMLTableElement)) {
 		return;
 	}
 	const enableClick = disableClick(table);
 	table.classList.add('animate-pulse');
-	const html = await fetch('/api/admin/pet').then(v => v.text());
+	const html = params
+		? await fetch(`/api/admin/pet?${params.toString()}`).then(v => v.text())
+		: await fetch(`/api/admin/pet`).then(v => v.text());
 	enableClick();
 
 	table.querySelector('tbody')?.remove();
@@ -114,6 +116,13 @@ function addTableEvents() {
 	for (const checkbox of document.getElementsByClassName('pet-select') as any as HTMLInputElement[] || []) {
 		checkbox.addEventListener('input', toggleSelect);
 	}
+
+	for (const a of document.getElementsByClassName('page-link') as any as HTMLLinkElement[] || []) {
+		a.addEventListener('click', navigatePage);
+	}
+
+	document.getElementById('page-previous')!.addEventListener('click', navigatePage);
+	document.getElementById('page-next')!.addEventListener('click', navigatePage);
 }
 
 function toggleSelectAll(this: HTMLInputElement) {
@@ -134,7 +143,7 @@ function toggleSelect(this: HTMLInputElement) {
 async function deleteSomePets(this: HTMLButtonElement) {
 	const indexes: number[] = [];
 	const buttons: HTMLButtonElement[] = [];
-	for (const [k, v] of (Array.from(document.getElementsByClassName('pet-select')) as HTMLInputElement[]).entries() ) {
+	for (const [k, v] of (Array.from(document.getElementsByClassName('pet-select')) as HTMLInputElement[]).entries()) {
 		if (v.checked) {
 			buttons.push(document.getElementById(`pet-delete-${k}`) as HTMLButtonElement);
 			indexes.push(k);
@@ -147,7 +156,7 @@ async function deleteSomePets(this: HTMLButtonElement) {
 	const clones: HTMLButtonElement[] = [];
 	const promise = fetch(requestString, { method: 'delete' });
 	buttons.push(this);
-	for(const button of buttons) {
+	for (const button of buttons) {
 		const clone = button.cloneNode() as HTMLButtonElement;
 		clones.push(clone);
 		clone.append(makeSpinner('w-5', 'h-5'));
@@ -158,7 +167,7 @@ async function deleteSomePets(this: HTMLButtonElement) {
 	const status = (await promise).status;
 	--deleteScheduler.counter;
 
-	for(const [k, button] of buttons.entries()) {
+	for (const [k, button] of buttons.entries()) {
 		clones[k].replaceWith(button);
 		clones[k].remove();
 	}
@@ -229,6 +238,28 @@ async function submitEdit(this: HTMLFormElement, ev: Event) {
 
 function closeEdit(this: HTMLDialogElement) {
 	editScheduler.editing = false;
+}
+
+async function navigatePage(this: HTMLLinkElement, ev: Event) {
+	ev.preventDefault();
+	const url = new URL(window.location.href);
+	let page = Number(url.searchParams.get('page')) || 1;
+	if (this.id === 'page-previous') {
+		if (--page < 1) {
+			return;
+		}
+	} else if (this.id === 'page-next') {
+		++page;
+	} else {
+		console.log(this.href, new URL(this.href));
+		page = Number(new URL(this.href).searchParams.get('page'));
+		if (isNaN(page)) {
+			return;
+		}
+	}
+	url.searchParams.set('page', page + '');
+	await updatePets(url.searchParams);
+	window.history.pushState({}, '', url);
 }
 
 document.getElementById('pet-form')?.addEventListener('submit', submit);
