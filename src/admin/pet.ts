@@ -235,7 +235,6 @@ document.getElementById('pet-form')?.addEventListener('submit', submit);
 document.getElementById('pet-add')?.addEventListener('pointerdown', showDialog);
 document.getElementById('pet-form-back')?.addEventListener('pointerdown', closeDialog);
 document.getElementById('pet-select-all')?.addEventListener('input', toggleSelectAll);
-document.getElementById('pet-select-all')?.addEventListener('input', toggleSelectAll);
 document.getElementById('pet-delete-some')?.addEventListener('click', deleteSomePets);
 document.getElementById('pet-edit-dialog')?.addEventListener('close', closeEdit);
 document.getElementById('pet-edit-form')?.addEventListener('submit', submitEdit);
