@@ -55,10 +55,11 @@ async function updatePets(params?: URLSearchParams) {
 	if (!(table instanceof HTMLTableElement)) {
 		return;
 	}
+	const paramsString = params?.toString() || new URLSearchParams(window.location.search).toString();
 	const enableClick = disableClick(table);
 	table.classList.add('animate-pulse');
-	const html = params
-		? await fetch(`/api/admin/pet?${params.toString()}`).then(v => v.text())
+	const html = paramsString
+		? await fetch(`/api/admin/pet?${paramsString}`).then(v => v.text())
 		: await fetch(`/api/admin/pet`).then(v => v.text());
 	enableClick();
 
@@ -251,7 +252,6 @@ async function navigatePage(this: HTMLLinkElement, ev: Event) {
 	} else if (this.id === 'page-next') {
 		++page;
 	} else {
-		console.log(this.href, new URL(this.href));
 		page = Number(new URL(this.href).searchParams.get('page'));
 		if (isNaN(page)) {
 			return;
