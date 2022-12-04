@@ -55,7 +55,7 @@ async function updatePets(params?: URLSearchParams) {
 	if (!(table instanceof HTMLTableElement)) {
 		return;
 	}
-	const paramsString = params?.toString() || new URLSearchParams(window.location.search).toString();
+	const paramsString = params ? params.toString() : new URLSearchParams(window.location.search).toString();
 	const enableClick = disableClick(table);
 	table.classList.add('animate-pulse');
 	const html = paramsString
@@ -122,8 +122,13 @@ function addTableEvents() {
 		a.addEventListener('click', navigatePage);
 	}
 
-	document.getElementById('page-previous')!.addEventListener('click', navigatePage);
-	document.getElementById('page-next')!.addEventListener('click', navigatePage);
+	for (const a of document.getElementsByClassName('page-next') as any as HTMLLinkElement[] || []) {
+		a.addEventListener('click', navigatePage);
+	}
+
+	for (const a of document.getElementsByClassName('page-previous') as any as HTMLLinkElement[] || []) {
+		a.addEventListener('click', navigatePage);
+	}
 }
 
 function toggleSelectAll(this: HTMLInputElement) {
@@ -245,11 +250,11 @@ async function navigatePage(this: HTMLLinkElement, ev: Event) {
 	ev.preventDefault();
 	const url = new URL(window.location.href);
 	let page = Number(url.searchParams.get('page')) || 1;
-	if (this.id === 'page-previous') {
+	if (this.classList.contains('page-previous')) {
 		if (--page < 1) {
 			return;
 		}
-	} else if (this.id === 'page-next') {
+	} else if (this.classList.contains('page-next')) {
 		++page;
 	} else {
 		page = Number(new URL(this.href).searchParams.get('page'));
