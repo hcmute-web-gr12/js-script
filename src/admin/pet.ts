@@ -234,6 +234,7 @@ async function submitEdit(this: HTMLFormElement, ev: Event) {
 	const response = await fetch('/api/admin/pet', { method: 'put', body: data });
 	remove();
 
+	(document.getElementById('pet-edit-form') as HTMLFormElement).reset();
 	if (response.status === 200) {
 		updatePets();
 		(document.getElementById('pet-edit-dialog') as HTMLDialogElement).close();
