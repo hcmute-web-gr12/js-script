@@ -22,12 +22,12 @@ function submit(this: HTMLFormElement, ev: Event) {
 	const error = document.getElementById('error') as HTMLParagraphElement;
 	const btn = (document.getElementById('add-to-cart') as HTMLButtonElement);
 	const remove = appendSpinner(btn, 'w-4', 'h-4', 'ml-2');
+	const data = new FormData();
 	btn.disabled = true;
 	error.classList.add('opacity-0');
+	data.set('id', props.id);
 	fetch('/api/cart', {
-		method: 'post', body: JSON.stringify({
-			id: props.id
-		}), headers: { 'Content-Type': 'application/json' }
+		method: 'post', body: new URLSearchParams(data as any)
 	}).then(v => {
 		if (v.status === 403) {
 			error.textContent = 'Xin vui lòng đăng nhập.';
