@@ -6,16 +6,14 @@ declare const props: {
 	stock: number,
 };
 
-document.
-	getElementById('description')!
-	.insertAdjacentHTML(
-		'afterbegin',
-		DOMPurify.sanitize(
-			marked.parse(
-				props.description.replace(/&grave;/g, '`'),
-				{ gfm: true, headerIds: true, smartypants: true, smartLists: true }).replace('&lt;', '<')
-		)
-	);
+document.getElementById('description')?.insertAdjacentHTML(
+	'afterbegin',
+	DOMPurify.sanitize(
+		marked.parse(
+			props.description.replace(/&grave;/g, '`'),
+			{ gfm: true, headerIds: true, smartypants: true, smartLists: true }).replace('&lt;', '<')
+	)
+);
 
 function submit(this: HTMLFormElement, ev: Event) {
 	ev.preventDefault();
